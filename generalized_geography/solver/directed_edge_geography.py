@@ -5,16 +5,16 @@ from generalized_geography.constants import *
 
 
 class DEGGraphSolver:
-  def __init__(self, G : nx.DiGraph):
+  def __init__(self, G : nx.MultiDiGraph):
     self._G_origin = G
-    self._G_copy : nx.DiGraph = G.copy()
+    self._G_copy : nx.MultiDiGraph = G.copy()
     self.type = {node : None for node in G}
     self.pred = {node : None for node in G}
 
   # classify win, lose node involving loop
   def classify_winlose(self, verbose = 1, order = "fast"):
     if order == "fast":
-      self.classify_loop_winlose(verbose)
+      self.classify_reusable_winlose(verbose)
       self.remove_2_cycles(verbose)
       self.classify_loop_winlose(verbose)
       
@@ -25,7 +25,7 @@ class DEGGraphSolver:
   def classify_loop_winlose(self, verbose = 1):
 
     if verbose == 1:
-      print("classify loop winlose : ", end="")
+      print("Classify loop winlose : ", end="")
 
     # outedge가 없는 노드들
     lose_sinks = [node for node, deg in self._G_copy.out_degree() if deg == 0]
@@ -67,36 +67,44 @@ class DEGGraphSolver:
 
           
 
-  # 0 cycle을 수반하는 필승, 필패 노드 분류
-  def classify_reuseable_winlose(self):
+  # 재사용룰 필승, 필패 노드 분류
+  def classify_reusable_winlose(self, verbose = 1):
+    if verbose == 1:
+      print("Classify reusable winlose : ", end="")
     sinks = [node for node, deg in self._G_copy.out_degree() if deg == 0]
+
     q = deque()
     for sink in sinks:
       self.type[sink] = LOSE
       q.append(sink)
     
     while q:
-      lose_node = q.popleft()
-      win_nodes = [n for n in self._G_copy.predecessors(lose_node) if self.type[n] == None]
       
-      self._G_copy.remove_node(lose_node)
-
-      for n in win_nodes:
-        self.pred[n] = lose_node
-
-      for n in win_nodes:
-        win_preds = [win_pred for win_pred in self._G_copy.predecessors(n) if self.type[win_pred] == None]
-        self._G_copy.remove_node(n)
-        for win_pred in win_preds:
-          if self._G_copy.out_degree(win_pred) == 0:
-            self.type[win_pred] = LOSE
-            self.pred[win_pred] = n
-            q.append(win_pred)
+      node = q.popleft()
+      
+      if self.type[node] == LOSE:
+        preds = [pred for pred in self._G_copy.predecessors(node) if self.type[pred] == None]
+        self._G_copy.remove_node(node)
+        for pred in preds:
+          self.type[pred] =WIN
+          self.pred[pred] = node
+          q.append(pred)
+      else:
+        preds = [pred for pred in self._G_copy.predecessors(node) if self.type[pred] == None]
+        self._G_copy.remove_node(node)
+        for pred in preds:
+          if self._G_copy.out_degree(pred) == 0 :
+            self.type[pred] = LOSE
+            self.pred[pred] = node
+            q.append(pred)
+    if verbose == 1:
+      print(len(self.get_nodes_by_type(WIN)),"win,",len(self.get_nodes_by_type(LOSE)), "lose,", len(self.get_nodes_by_type(None)), "remain")
+    
 
 
   def remove_2_cycles(self, verbose = 1):
     if verbose == 1:
-      print("remove 2 cycles : ", end="")
+      print("Remove 2 cycles : ", end="")
     to_remove = []
     
     # remove self loop even number
@@ -119,7 +127,7 @@ class DEGGraphSolver:
     if verbose == 1:
       print(len(to_remove), "edges removed")
 
-    return to_remove 
+    
   def get_nodes_by_type(self, node_type):
     return [node for node, type in self.type.items() if type == node_type]
   
@@ -131,5 +139,3 @@ if __name__ == "__main__":
   G = nx.MultiDiGraph()
   G.add_edges_from([(1,2),(1,2),(2,1),(1,1), (2,2),(2,2)])
   
-
-  # print(nx.adjacency_matrix(G))
