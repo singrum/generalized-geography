@@ -1,6 +1,6 @@
 import networkx as nx
 from collections import deque
-from generalized_geography.constants import *
+from generalized_geography.utils.constants import *
 
 
 
@@ -10,7 +10,6 @@ class DVGGraphSolver:
     self._G_copy : nx.DiGraph = G.copy()
     self.type = {node : None for node in G}
     self.pred = {node : None for node in G}
-
 
   def classify_winlose(self, verbose = 1):
     self.remove_loops()

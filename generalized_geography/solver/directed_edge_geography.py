@@ -1,13 +1,14 @@
 import networkx as nx
 from collections import deque
-from generalized_geography.constants import *
-
+from generalized_geography.utils.constants import *
+from generalized_geography.classes.unlabeled_multidigraph import UnlabeledMultiDigraph
 
 
 class DEGGraphSolver:
-  def __init__(self, G : nx.MultiDiGraph):
+  def __init__(self, G : UnlabeledMultiDigraph):
     self._G_origin = G
-    self._G_copy : nx.MultiDiGraph = G.copy()
+    self._G_copy : UnlabeledMultiDigraph = G.copy()
+    
     self.type = {node : None for node in G}
     self.pred = {node : None for node in G}
 
@@ -105,27 +106,27 @@ class DEGGraphSolver:
   def remove_2_cycles(self, verbose = 1):
     if verbose == 1:
       print("Remove 2 cycles : ", end="")
+
     to_remove = []
     
     # remove self loop even number
     for node in self._G_copy.nodes:
-      num = self._G_copy.number_of_edges(node, node)
-      to_remove += [(node,node)] * (num // 2) * 2
-    distinct_edges = set(self._G_copy.edges())
+      if self._G_copy.has_edge(node,node):
+        num = self._G_copy.get_multiplicity(node, node)
+        to_remove.append((node, node, num - num % 2))
 
     # remove 2 loop containing 2 distinct nodes
-    for u,v in distinct_edges:
-      if u >=v:
-        continue
-      if (u,v) in to_remove:
-        continue
+    for u,v in [(u,v) for u,v in self._G_copy.edges if u > v]:
+      
       if self._G_copy.has_edge(v,u):
-        delete_num = min(self._G_copy.number_of_edges(u, v),  self._G_copy.number_of_edges(v, u))
-        to_remove += [(u,v), (v,u)] * delete_num
+        delete_num = min(self._G_copy.get_multiplicity(u, v),  self._G_copy.get_multiplicity(v, u))
+        to_remove.append((u,v, delete_num))
+        to_remove.append((v,u, delete_num))
+    
     self._G_copy.remove_edges_from(to_remove)   
 
     if verbose == 1:
-      print(len(to_remove), "edges removed")
+      print(sum([m for _,_,m in to_remove]), "edges removed")
 
     
   def get_nodes_by_type(self, node_type):
