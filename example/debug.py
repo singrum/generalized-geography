@@ -3,5 +3,6 @@ import networkx as nx
 
 g = UnlabeledMultiDigraph()
 g.add_edge(1,2)
-print(g.copy()[1])
+# print(g.copy()[1])
 
+print(type(g.edges(data="weight")))

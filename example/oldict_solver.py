@@ -1,23 +1,18 @@
 from generalized_geography.dataset.oldict import load_data
-from generalized_geography.solver.directed_edge_geography import DEGGraphSolver
+from generalized_geography.solver.directed_edge_geography import *
 from generalized_geography.utils.constants import *
 
-import math
 import time
 
 
-G = load_data()
-
-solver = DEGGraphSolver(G)
+graph = load_data()
 start = time.time()
-solver.classify_winlose(order="simple")
-end = time.time()
-print(end - start)
 
+classify_reusable_winlose(graph)
+remove_2_cycles(graph)
+classify_loop_winlose(graph)
+remove_2_cycles(graph)
 
-solver = DEGGraphSolver(G)
-start = time.time()
-solver.classify_winlose(order="fast")
 end = time.time()
-print(end - start)
+
 

@@ -2,6 +2,12 @@ from networkx.classes.digraph import DiGraph
 from networkx.exception import NetworkXError
 
 class UnlabeledMultiDigraph(DiGraph):
+  @classmethod
+  def fromNxGraph(self, mdg):
+    c = self()
+    c.add_edges_from(mdg.edges())
+    return c
+
   def edge_dict(self):
     return {"multiplicity" : 1}
   edge_attr_dict_factory = edge_dict
@@ -13,7 +19,7 @@ class UnlabeledMultiDigraph(DiGraph):
     if self.has_edge(u, v):
       self[u][v]['multiplicity'] += num
     else:
-      super().add_edge(u, v)
+      super().add_edge(u, v, multiplicity = num)
 
   def add_edges_from(self, ebunch_to_add):
     for e in ebunch_to_add:
@@ -29,9 +35,7 @@ class UnlabeledMultiDigraph(DiGraph):
   
   def remove_edge(self, u, v, num = None):
     if self.has_edge(u, v):
-      if num == None:
-        super().remove_edge(u, v)
-      elif self[u][v]['multiplicity'] > num:
+      if num != None and self[u][v]['multiplicity'] > num:
         self[u][v]['multiplicity'] -= num
       else:
         super().remove_edge(u, v)
@@ -51,4 +55,6 @@ class UnlabeledMultiDigraph(DiGraph):
   def get_multiplicity(self, u, v):
     
     return self[u][v]['multiplicity'] if self.has_edge(u, v) else 0
-	
+
+  
+  
