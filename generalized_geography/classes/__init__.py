@@ -1,1 +1,1 @@
-from generalized_geography.classes.unlabeled_multidigraph import *
+from .unlabeled_multidigraph import *

@@ -1,1 +1,1 @@
-from generalized_geography.utils.constants import *
+from .constants import *
