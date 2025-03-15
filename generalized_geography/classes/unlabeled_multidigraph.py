@@ -1,10 +1,12 @@
 from networkx.classes.digraph import DiGraph
 from networkx.exception import NetworkXError
 
-class UnlabeledMultiDigraph(DiGraph):
+class UnlabeledMultiDiGraph(DiGraph):
   @classmethod
   def fromNxGraph(self, mdg):
     c = self()
+    print(c)
+    c.add_nodes_from(mdg.nodes())
     c.add_edges_from(mdg.edges())
     return c
 
@@ -56,5 +58,11 @@ class UnlabeledMultiDigraph(DiGraph):
     
     return self[u][v]['multiplicity'] if self.has_edge(u, v) else 0
 
+  def multi_out_degree(self,node):
+    return sum([m for _,_,m in self.out_edges(node,data="multiplicity")])
   
-  
+  def copy(self):
+    c = self.__class__()
+    c.add_nodes_from(self.nodes())
+    c.add_edges_from(self.edges(data="multiplicity"))
+    return c
