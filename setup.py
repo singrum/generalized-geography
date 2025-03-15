@@ -1,8 +1,8 @@
 import setuptools
 
 setuptools.setup(
-    name="generalized-geography", # Replace with your own username
-    version="0.0.1",
+    name="generalized-geography",
+    version="0.0.2",
     author="Hyomin",
     author_email="miamiq0000@gmail.com",
     description="Generalized Geography Game Solver",
