@@ -16,8 +16,8 @@ graph = graph_origin.copy()
 node_type = gg.complete_classify(graph)
 
 # 필승 노드, 필패 노드를 각각 모아서 리스트로 만듦
-win_nodes = [node for node in graph_origin.nodes if node_type[node] == gg.WIN]
-lose_nodes = [node for node in graph_origin.nodes if node_type[node] == gg.LOSE]
+win_nodes = [node for node in graph_origin.nodes if node_type[node] == "W"]
+lose_nodes = [node for node in graph_origin.nodes if node_type[node] == "L"]
 
 # 그래프 출력
 pos = nx.shell_layout(graph_origin)

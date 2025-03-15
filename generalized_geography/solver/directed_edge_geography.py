@@ -62,16 +62,16 @@ def classify_reusable_winlose(graph : gg.UnlabeledMultiDiGraph, verbose = 1, sin
   
   q = deque()
   for sink in sinks:
-    node_type[sink] = gg.LOSE
+    node_type[sink] = "L"
     q.append(sink)
   
   while q:
     node = q.popleft()
-    if node_type[node] == gg.LOSE:
+    if node_type[node] == "L":
       preds = [pred for pred in graph.predecessors(node) if pred not in node_type]
       graph.remove_node(node)
       for pred in preds:
-        node_type[pred] = gg.WIN
+        node_type[pred] = "W"
         path_graph.add_edge(pred, node)
         q.append(pred)
     else:
@@ -79,13 +79,13 @@ def classify_reusable_winlose(graph : gg.UnlabeledMultiDiGraph, verbose = 1, sin
       graph.remove_node(node)
       for pred in preds:
         if graph.out_degree(pred) == 0 :
-          node_type[pred] = gg.LOSE
+          node_type[pred] = "L"
           path_graph.add_edge(pred, node)
           q.append(pred)
 
   if verbose == 1:
-    win_nodes = [node for node in node_type if node_type[node] == gg.WIN]
-    lose_nodes = [node for node in node_type if node_type[node] == gg.LOSE]
+    win_nodes = [node for node in node_type if node_type[node] == "W"]
+    lose_nodes = [node for node in node_type if node_type[node] == "L"]
     print(len(win_nodes),"win,",len(lose_nodes), "lose,", len(graph), "remain")
 
   return node_type, path_graph
@@ -111,19 +111,19 @@ def classify_loop_winlose(graph : gg.UnlabeledMultiDiGraph, verbose = 1, lose_si
   
 
   for n in lose_sinks:
-    node_type[n] = gg.LOSE
+    node_type[n] = "L"
   for n in win_sinks:
-    node_type[n] = gg.WIN
+    node_type[n] = "W"
 
   q = deque(lose_sinks + win_sinks)
 
   while q:
     node = q.popleft()
-    if node_type[node] == gg.LOSE:
+    if node_type[node] == "L":
       preds = [pred for pred in graph.predecessors(node) if pred not in node_type]
       graph.remove_node(node)
       for pred in preds:
-        node_type[pred] = gg.WIN
+        node_type[pred] = "W"
         path_graph.add_edge(pred, node)
         q.append(pred)
       
@@ -132,18 +132,18 @@ def classify_loop_winlose(graph : gg.UnlabeledMultiDiGraph, verbose = 1, lose_si
       graph.remove_node(node)
       for pred in preds:
         if graph.out_degree(pred) == 0 :
-          node_type[pred] = gg.LOSE
+          node_type[pred] = "L"
           path_graph.add_edge(pred, node)
           q.append(pred)
         elif graph.out_degree(pred) == 1 and graph.get_multiplicity(pred,pred) == 1:
-          node_type[pred] = gg.WIN
+          node_type[pred] = "W"
           path_graph.add_edge(pred, pred)
           path_graph.add_edge(pred, node)
           q.append(pred)
 
   if verbose == 1:
-    win_nodes = [node for node in node_type if node_type[node] == gg.WIN]
-    lose_nodes = [node for node in node_type if node_type[node] == gg.LOSE]
+    win_nodes = [node for node in node_type if node_type[node] == "W"]
+    lose_nodes = [node for node in node_type if node_type[node] == "L"]
     print(len(win_nodes),"win,",len(lose_nodes), "lose,", len(graph), "remain")
     
   return node_type, path_graph
@@ -178,7 +178,7 @@ def is_win_dfs(graph : gg.UnlabeledMultiDiGraph, node):
   node_type = fast_classify(graph, verbose=0)
 
   if node in node_type:
-    if node_type[node] == gg.WIN:
+    if node_type[node] == "W":
       return True
     else:
       return False
@@ -192,4 +192,4 @@ def is_win_dfs(graph : gg.UnlabeledMultiDiGraph, node):
 
 # graph에서 모든 노드들에 대해서 승패 여부를 dfs로 계산하여 반환
 def classify_dfs_winlose(graph : gg.UnlabeledMultiDiGraph):
-  return {node : gg.WIN if is_win_dfs(graph, node) else gg.LOSE for node in graph}
+  return {node : "W" if is_win_dfs(graph, node) else "L" for node in graph}

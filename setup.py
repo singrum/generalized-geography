@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="generalized-geography",
-    version="0.0.2",
+    version="0.0.3",
     author="Hyomin",
     author_email="miamiq0000@gmail.com",
     description="Generalized Geography Game Solver",
