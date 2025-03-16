@@ -1,6 +1,7 @@
-__version__ = '0.0.3'
+__version__ = '0.0.5'
 
+from . import classes
 from .classes import *
-from .solver import *
-from .utils import *
 
+from . import solver
+from .solver import *

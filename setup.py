@@ -2,10 +2,12 @@ import setuptools
 
 setuptools.setup(
     name="generalized-geography",
-    version="0.0.3",
+    version="0.0.5",
     author="Hyomin",
     author_email="miamiq0000@gmail.com",
     description="Generalized Geography Game Solver",
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     url="https://github.com/singrum/generalized-geography",
     install_requires=['networkx', 'matplotlib'],
     packages=setuptools.find_packages(),
