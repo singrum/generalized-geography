@@ -13,7 +13,7 @@ deg.remove_2_cycles(graph_origin)
 # 그래프 복사
 graph = graph_origin.copy()
 
-# 모든 음절의 승/패 여부를 알아냄
+# 모든 노드드의 승/패 여부를 알아냄
 node_type = deg.completely_classify(graph)
 
 # 필승 노드, 필패 노드를 각각 모아서 리스트로 만듦

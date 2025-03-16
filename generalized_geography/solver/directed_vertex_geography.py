@@ -8,23 +8,29 @@ def fastly_classify(graph: nx.DiGraph, verbose=1):
     return node_type
 
 
+def completely_classify(graph: nx.DiGraph, verbose=1):
+    node_type1 = fastly_classify(graph, verbose)
+    node_type2 = classify_dfs_winlose(graph)
+    return {**node_type1, **node_type2}
+
+
 def remove_loops(graph: nx.DiGraph, verbose=1):
     if verbose == 1:
-        print("Remove loops : ")
+        print("Remove loops : ", end="")
 
-    loop_nodes = [node for node in graph.has_edge(node, node)]
+    loop_nodes = [node for node in graph if graph.has_edge(node, node)]
     for node in loop_nodes:
         graph.remove_edge(node, node)
 
     if verbose == 1:
-        print(len(loop_nodes) + "edge removed")
+        print(f"{len(loop_nodes)} edge removed")
 
     return loop_nodes
 
 
-def classify_reusable_winlose(graph: nx.DiGraph, verbose=1):
+def classify_reusable_winlose(graph: nx.DiGraph, verbose=1, sinks=None):
     if verbose == 1:
-        print("Classify reusable winlose : ")
+        print("Classify reusable winlose : ", end="")
 
     node_type = {}
     path_graph = nx.DiGraph()
