@@ -15,7 +15,11 @@ graph.add_edges_from([(e[0], e[-1]) for e in words])
 
 # 승패 분류 후 중립 음절만 남김
 start = time.time()
-deg.fastly_classify(graph)
+node_type = deg.fastly_classify(graph)
 end = time.time()
 
 print(f"time : {round(end - start, 3)}")
+
+print("승리 음절 : " + ", ".join([node for (node, t) in node_type.items() if t == "W"]))
+print("패배 음절 : " + ", ".join([node for (node, t) in node_type.items() if t == "L"]))
+print("루트 음절 : " + ", ".join(graph.nodes))
