@@ -1,6 +1,6 @@
 import networkx as nx
 import generalized_geography as gg
-import generalized_geography.solver.directed_edge_geography as deg
+import generalized_geography.game.directed_edge_geography.solver as deg
 import matplotlib.pyplot as plt
 import random
 

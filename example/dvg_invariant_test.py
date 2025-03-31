@@ -1,5 +1,5 @@
 from platform import node
-import generalized_geography.solver.directed_vertex_geography as dvg
+import generalized_geography.game.directed_vertex_geography.solver as dvg
 import networkx as nx
 
 
