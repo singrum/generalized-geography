@@ -17,10 +17,10 @@ class BipartiteNode(NamedTuple):
     index: int
 
 
-def fastly_classify(graph, verbose=1):
-    node_type1 = classify_reusable_winlose(graph, verbose=verbose)
+def fastly_classify(graph, verbose=0):
+    node_type1, _ = classify_reusable_winlose(graph, verbose=verbose)
     remove_2_cycles(graph, verbose=verbose)
-    node_type2 = classify_loop_winlose(graph, verbose=verbose)
+    node_type2, _ = classify_loop_winlose(graph, verbose=verbose)
     return {**node_type1, **node_type2}
 
 
@@ -31,7 +31,7 @@ def get_unique_out_edges(graph: gg.UnlabeledMultiDiGraph):
     return edges
 
 
-def remove_2_cycles(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None, verbose=1):
+def remove_2_cycles(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None, verbose=0):
 
     if verbose == 1:
         print("Remove 2 cycles : ", end="")
@@ -66,8 +66,10 @@ def remove_2_cycles(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None, verb
     if verbose == 1:
         print(sum([m for _, _, m in to_remove]), "edges removed")
 
+    return to_remove
 
-def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None, verbose=1, lose_sinks=None, win_sinks=None):
+
+def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None, verbose=0, lose_sinks=None, win_sinks=None):
     if verbose == 1:
         print("Classify loop winlose : ", end="")
 
@@ -75,6 +77,7 @@ def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None
         unique_out_edges = get_unique_out_edges(graph)
 
     node_type = {}
+    path_graph = DiGraph()
     loops = DiGraph()
     loops.add_edges_from(
         [(v, u) for u, v in unique_out_edges if graph.has_edge(v, u)])
@@ -89,6 +92,7 @@ def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None
     for n in lose_sinks:
         node_type[n] = "L"
     for n in win_sinks:
+        path_graph.add_edge(n, list(graph.out_edges(n))[0])
         node_type[n] = "W"
 
     q: Deque[BipartiteNode] = deque(win_sinks + lose_sinks)
@@ -104,16 +108,21 @@ def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None
             if node_type[node] == "L":
                 for pred in preds:
                     node_type[pred] = "W"
+                    path_graph.add_edge(pred, node)
                     q.append(pred)
 
             else:
                 for pred in preds:
                     if graph.out_degree(pred) == 0:
                         node_type[pred] = "L"
+                        path_graph.add_edge(pred, node)
                         q.append(pred)
 
                     elif graph.out_degree(pred) == 1 and loops.has_edge(*list(graph.out_edges(pred))[0]):
                         node_type[pred] = "W"
+                        path_graph.add_edge(
+                            pred, list(graph.out_edges(pred))[0])
+                        path_graph.add_edge(pred, node)
                         q.append(pred)
         else:
             if node_type[node] == "L":
@@ -133,13 +142,15 @@ def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, unique_out_edges=None
         print(len(win_nodes), "win,", len(lose_nodes),
               "lose,", len(graph), "remain")
 
-    return node_type
+    return node_type, path_graph
 
 
-def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1):
+def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=0):
     if verbose == 1:
         print("Classify loop winlose : ", end="")
     node_type = {}
+    path_graph = DiGraph()
+
     sinks = [node for node, deg in graph.out_degree() if deg == 0]
 
     q: Deque[BipartiteNode] = deque()
@@ -156,12 +167,14 @@ def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1):
         if node.index == 0:
             if node_type[node] == "L":
                 for pred in preds:
+                    path_graph.add_edge(pred, node)
                     node_type[pred] = "W"
                     q.append(pred)
 
             else:
                 for pred in preds:
                     if graph.out_degree(pred) == 0:
+                        path_graph.add_edge(pred, node)
                         node_type[pred] = "L"
                         q.append(pred)
 
@@ -169,11 +182,13 @@ def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1):
             if node_type[node] == "L":
                 for pred in preds:
                     if graph.out_degree(pred) == 0:
+                        path_graph.add_edge(pred, node)
                         node_type[pred] = "L"
                         q.append(pred)
 
             else:
                 for pred in preds:
+                    path_graph.add_edge(pred, node)
                     node_type[pred] = "W"
                     q.append(pred)
 
@@ -183,7 +198,7 @@ def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1):
         print(len(win_nodes), "win,", len(lose_nodes),
               "lose,", len(graph), "remain")
 
-    return node_type
+    return node_type, path_graph
 
 
 def reachable_graph(graph: gg.UnlabeledMultiDiGraph, node: any) -> gg.UnlabeledMultiDiGraph:
@@ -245,27 +260,3 @@ def get_major_graph(graph: gg.UnlabeledMultiDiGraph) -> gg.UnlabeledMultiDiGraph
         raise Exception("주요 루트 없음")
 
     return graph.subgraph(leaf_sccs[0]).copy()
-
-
-class Encoder:
-    def __init__(self, edges: list[Tuple[BipartiteNode, BipartiteNode]]):
-        self.edges_map = edges
-        self.index_map = {edge: i for i, edge in enumerate(edges)}
-
-    def encode(self, index: int):
-        return self.index_map[index]
-
-    def decode(self, edge: Tuple[BipartiteNode, BipartiteNode]):
-        return self.edges_map[edge]
-
-
-class Game:
-    def __init__(self, graph: gg.UnlabeledMultiDiGraph):
-        self.original_graph = graph
-        self.node_type = fastly_classify(graph)
-
-        self.major_graph = get_major_graph(graph)
-        self.encoder = Encoder(
-            [e for e in self.major_graph.edges if e[0].index == 1])
-
-        

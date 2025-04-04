@@ -1,8 +1,8 @@
-from . import classes
-from .classes import *
+from . import application
+from .application import *
 
-from . import utils
-from .utils import *
+from . import graph
+from .graph import *
 
-from . import solver
-from .solver import *
+from . import train
+from .train import *

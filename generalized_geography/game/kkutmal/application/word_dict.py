@@ -3,7 +3,7 @@ from collections import defaultdict
 from typing import DefaultDict, List
 import generalized_geography as gg
 import generalized_geography.game.kkutmal as km
-from generalized_geography.game.kkutmal.classes.rule import Rule
+from generalized_geography.game.kkutmal.application.rule import Rule
 
 
 class WordDict:

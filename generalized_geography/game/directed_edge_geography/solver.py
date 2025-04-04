@@ -5,7 +5,7 @@ import generalized_geography as gg
 # 그래프에서 중립 노드를 제외하고 모두 삭제하고, 삭제된 노드의 승패 여부를 알려주는 dict 반환
 
 
-def fastly_classify(graph: gg.UnlabeledMultiDiGraph, verbose=1):
+def fastly_classify(graph: gg.UnlabeledMultiDiGraph, verbose=0):
     node_type1, _ = classify_reusable_winlose(graph, verbose)
     remove_2_cycles(graph, verbose)
     node_type2, _ = classify_loop_winlose(graph, verbose)
@@ -14,7 +14,7 @@ def fastly_classify(graph: gg.UnlabeledMultiDiGraph, verbose=1):
 # 그래프에서 중립 노드를 제외하고 모두 삭제하고, 모든 노드의 승패 여부를 알려주는 dict 반환
 
 
-def completely_classify(graph: gg.UnlabeledMultiDiGraph, verbose=1):
+def completely_classify(graph: gg.UnlabeledMultiDiGraph, verbose=0):
     node_type1 = fastly_classify(graph, verbose)
     node_type2 = classify_dfs_winlose(graph)
     return {**node_type1, **node_type2}
@@ -23,7 +23,7 @@ def completely_classify(graph: gg.UnlabeledMultiDiGraph, verbose=1):
 # O(E+V)
 
 
-def remove_2_cycles(graph: gg.UnlabeledMultiDiGraph, verbose=1):
+def remove_2_cycles(graph: gg.UnlabeledMultiDiGraph, verbose=0):
 
     if verbose == 1:
         print("Remove 2 cycles : ", end="")
@@ -57,7 +57,7 @@ def remove_2_cycles(graph: gg.UnlabeledMultiDiGraph, verbose=1):
 # O(E+V)
 
 
-def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1, sinks=None):
+def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=0, sinks=None):
     if verbose == 1:
         print("Classify reusable winlose : ", end="")
 
@@ -104,7 +104,7 @@ def classify_reusable_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1, sinks=
 # O(E+V)
 
 
-def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1, lose_sinks=None, win_sinks=None):
+def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=0, lose_sinks=None, win_sinks=None):
 
     if verbose == 1:
         print("Classify loop winlose : ", end="")
@@ -123,6 +123,7 @@ def classify_loop_winlose(graph: gg.UnlabeledMultiDiGraph, verbose=1, lose_sinks
     for n in lose_sinks:
         node_type[n] = "L"
     for n in win_sinks:
+        path_graph.add_edge(n,n)
         node_type[n] = "W"
 
     q = deque(lose_sinks + win_sinks)

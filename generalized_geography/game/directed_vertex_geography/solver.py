@@ -2,19 +2,19 @@ import networkx as nx
 from collections import deque
 
 
-def fastly_classify(graph: nx.DiGraph, verbose=1):
+def fastly_classify(graph: nx.DiGraph, verbose=0):
     remove_loops(graph, verbose)
     node_type, _ = classify_reusable_winlose(graph, verbose)
     return node_type
 
 
-def completely_classify(graph: nx.DiGraph, verbose=1):
+def completely_classify(graph: nx.DiGraph, verbose=0):
     node_type1 = fastly_classify(graph, verbose)
     node_type2 = classify_dfs_winlose(graph)
     return {**node_type1, **node_type2}
 
 
-def remove_loops(graph: nx.DiGraph, verbose=1):
+def remove_loops(graph: nx.DiGraph, verbose=0):
     if verbose == 1:
         print("Remove loops : ", end="")
 
@@ -28,7 +28,7 @@ def remove_loops(graph: nx.DiGraph, verbose=1):
     return loop_nodes
 
 
-def classify_reusable_winlose(graph: nx.DiGraph, verbose=1, sinks=None):
+def classify_reusable_winlose(graph: nx.DiGraph, verbose=0, sinks=None):
     if verbose == 1:
         print("Classify reusable winlose : ", end="")
 
