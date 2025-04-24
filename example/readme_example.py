@@ -1,5 +1,5 @@
 import generalized_geography as gg
-import generalized_geography.game.directed_edge_geography.solver as deg
+import generalized_geography.graph.deg as deg
 
 graph = gg.UnlabeledMultiDiGraph()
 graph.add_edges_from([(0, 1), (0, 1), (1, 2), (2, 3),
