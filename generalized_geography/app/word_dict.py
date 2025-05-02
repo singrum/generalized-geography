@@ -1,7 +1,9 @@
 
 from collections import defaultdict
 from typing import DefaultDict, List
-import generalized_geography as gg
+
+from generalized_geography.common.CDEG_graph import BipartiteNode, CDEGGraph
+
 from .rule import Rule
 
 
@@ -22,8 +24,8 @@ class WordDict:
     def get_words(self, first_char, last_char) -> List[str]:
         return self.word_dict[first_char][last_char]
 
-    def make_graph(self) -> gg.UnlabeledMultiDiGraph:
-        graph = gg.UnlabeledMultiDiGraph()
+    def make_graph(self) -> CDEGGraph:
+        graph = CDEGGraph()
         chars = set()
 
         for char1 in self.word_dict:
@@ -31,14 +33,14 @@ class WordDict:
                 chars.update(char1, char2)
 
         chan_edges = sum([
-            [(gg.BipartiteNode(char, 0), gg.BipartiteNode(chan, 1))
+            [(BipartiteNode(char, 0), BipartiteNode(chan, 1))
              for chan in self.rule.change_rule(char) if chan in chars]
             for char in chars], [])
 
         words = [item for subdict in self.word_dict.values()
                  for lst in subdict.values() for item in lst]
 
-        word_edges = [(gg.BipartiteNode(word[0], 1), gg.BipartiteNode(word[-1], 0))
+        word_edges = [(BipartiteNode(word[0], 1), BipartiteNode(word[-1], 0))
                       for word in words]
 
         graph.add_edges_from(chan_edges + word_edges)

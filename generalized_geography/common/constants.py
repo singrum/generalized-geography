@@ -1,2 +1,2 @@
-LOS = 0
+LOSE = 0
 WIN = 1

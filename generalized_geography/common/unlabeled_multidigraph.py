@@ -1,68 +1,74 @@
+# 엣지 (u, v)의 개수를 "num" attribute로 표현한 MultiDiGraph
+
+from networkx import MultiDiGraph
 from networkx.classes.digraph import DiGraph
 from networkx.exception import NetworkXError
 
 
 class UnlabeledMultiDiGraph(DiGraph):
     @classmethod
-    def from_nx_graph(self, mdg):
+    def from_nx_graph(self, mdg: DiGraph | MultiDiGraph):
         c = self()
         c.add_nodes_from(mdg.nodes())
-        c.add_edges_from(mdg.edges())
+        c.increase_edges_from(mdg.edges())
         return c
 
     def edge_dict(self):
-        return {"multiplicity": 1}
+        return {"num": 1}
+
     edge_attr_dict_factory = edge_dict
 
     def __init__(self):
         super().__init__()
 
-    def add_edge(self, u, v, num=1):
+    def increase_edge(self, u, v, num=1):
         if self.has_edge(u, v):
-            self[u][v]['multiplicity'] += num
+            self[u][v]['num'] += num
         else:
-            super().add_edge(u, v, multiplicity=num)
+            super().add_edge(u, v, num=num)
 
-    def add_edges_from(self, ebunch_to_add):
+    def increase_edges_from(self, ebunch_to_add):
         for e in ebunch_to_add:
             ne = len(e)
             if ne == 3:
-                u, v, multiplicity = e
+                u, v, num = e
             elif ne == 2:
                 u, v = e
-                multiplicity = 1
+                num = 1
             else:
                 raise NetworkXError("")
-            self.add_edge(u, v, multiplicity)
+            self.increase_edge(u, v, num)
 
-    def remove_edge(self, u, v, num=None):
+    def decrease_edge(self, u, v, num=1):
         if self.has_edge(u, v):
-            if num != None and self[u][v]['multiplicity'] > num:
-                self[u][v]['multiplicity'] -= num
+            if self[u][v]['num'] > num:
+                self[u][v]['num'] -= num
             else:
                 super().remove_edge(u, v)
 
-    def remove_edges_from(self, ebunch):
+    def decrease_edges_from(self, ebunch):
         for e in ebunch:
             ne = len(e)
             if ne == 3:
-                u, v, multiplicity = e
+                u, v, num = e
             elif ne == 2:
                 u, v = e
-                multiplicity = 1
+                num = 1
             else:
                 raise NetworkXError("")
-            self.remove_edge(u, v, multiplicity)
+            self.decrease_edge(u, v, num)
 
-    def get_multiplicity(self, u, v):
+    def set_num(self, u, v, num):
+        if num == 0 and self.has_edge(u, v):
+            super().remove_edge(u, v)
+        else:
+            self[u][v]['num'] = num
 
-        return self[u][v]['multiplicity'] if self.has_edge(u, v) else 0
+    def get_num(self, u, v):
+        return self[u][v]['num'] if self.has_edge(u, v) else 0
 
     def multi_out_degree(self, node):
-        return sum([m for _, _, m in self.out_edges(node, data="multiplicity")])
+        return sum([m for _, _, m in self.out_edges(node, data="num")])
 
-    def copy(self):
-        c = self.__class__()
-        c.add_nodes_from(self.nodes())
-        c.add_edges_from(self.edges(data="multiplicity"))
-        return c
+    def multi_in_degree(self, node):
+        return sum([m for _, _, m in self.in_edges(node, data="num")])
