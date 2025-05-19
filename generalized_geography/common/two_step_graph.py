@@ -20,7 +20,7 @@ BipartiteEdge = NewType("BipartiteEdge", Tuple[BipartiteNode, BipartiteNode])
 Move = NewType("Move", Tuple[NodeValue, NodeValue])
 
 
-class CDEGGraph(UnlabeledMultiDiGraph):
+class TwoStepGraph(UnlabeledMultiDiGraph):
     def __init__(self):
         super().__init__()
 

@@ -13,6 +13,6 @@ with open("dataset/oldict.txt", "r", encoding="UTF-8") as f:
 rule = gg.Rule(0, -1, gg.std)
 word_dict = gg.WordDict(rule, words)
 graph = word_dict.make_graph()
-solver = gg.CDEGSolver(graph)
+solver = gg.TwoStepDEGSolver(graph)
 
 print({n.value: solver.winlose[n] for n in solver.winlose if n.index == 0})

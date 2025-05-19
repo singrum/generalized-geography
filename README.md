@@ -33,6 +33,6 @@ Directed Edge Geography
 
 Directed Vertex Geography
 
-### CDEG
+### Two Step DEG
 
-Changeable Directed Vertex Geography
+Directed Vertex Geography with Two Step Moves

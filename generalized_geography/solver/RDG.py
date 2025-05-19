@@ -11,7 +11,7 @@ class RDGSolver:
     winlose: Dict[NodeValue, int]
 
     def __init__(self, graph: DiGraph):
-        self.graph = graph
+        self.graph = graph.copy()
         self.winlose = {}
 
     def classify_repetitive_winlose(self, sinks=None, verbose=0):

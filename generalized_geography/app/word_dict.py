@@ -2,7 +2,7 @@
 from collections import defaultdict
 from typing import DefaultDict, List
 
-from generalized_geography.common.CDEG_graph import BipartiteNode, CDEGGraph
+from generalized_geography.common.two_step_graph import BipartiteNode, TwoStepGraph, TwoStepGraph
 
 from .rule import Rule
 
@@ -24,8 +24,8 @@ class WordDict:
     def get_words(self, first_char, last_char) -> List[str]:
         return self.word_dict[first_char][last_char]
 
-    def make_graph(self) -> CDEGGraph:
-        graph = CDEGGraph()
+    def make_graph(self) -> TwoStepGraph:
+        graph = TwoStepGraph()
         chars = set()
 
         for char1 in self.word_dict:

@@ -1,5 +1,5 @@
 ### Changeable Directed Edge Geography ###
-# data structure : CDEGGraph that have nodes = V x {0,1} for some V and edges such that e[0][1] != e[1][1]
+# data structure : TwoStepGraph that have nodes = V x {0,1} for some V and edges such that e[0][1] != e[1][1]
 #                  노드는 (v,0) 또는 (v,1) 튜플로 나타내어짐
 #                  엣지는 (u,0)->(v,1) 또는 (u,1)->(v,0) 꼴
 # position : (G, (v, 0))
@@ -10,28 +10,28 @@ from networkx import DiGraph, condensation, descendants, strongly_connected_comp
 from generalized_geography.app.change_rules import std
 from generalized_geography.app.rule import Rule
 from generalized_geography.app.word_dict import WordDict
-from generalized_geography.common.CDEG_graph import BipartiteNode, CDEGGraph, Move
+from generalized_geography.common.two_step_graph import BipartiteNode, TwoStepGraph, Move
 from generalized_geography.common.constants import LOSE, WIN
 from generalized_geography.common.types import NodeValue
 
 
-class CDEGSolver:
-    graph: CDEGGraph
+class TwoStepDEGSolver:
+    graph: TwoStepGraph
     winlose: Dict[BipartiteNode, int]
     strategy: Dict[BipartiteNode, NodeValue]
     loops = DiGraph
 
-    def __init__(self, graph: CDEGGraph):
+    def __init__(self, graph: TwoStepGraph):
         self.winlose = {}
-        self.graph = graph
+        self.graph = graph.copy()
         self.strategy = {}
         self.loops = DiGraph()
-        self.fastly_classify(verbose=0)
+        self.fastly_classify_involving_2_cycles(verbose=1)
 
-    def fastly_classify(self, verbose=0):
+    def fastly_classify_involving_2_cycles(self, verbose=0):
         self.classify_repetitive_winlose(verbose=verbose)
         self.remove_2_circuits(verbose=verbose)
-        self.classify_loop_winlose(verbose=verbose)
+        self.classify_winlose_involving_1_cycles(verbose=verbose)
 
     def classify_repetitive_winlose(self, verbose=0):
         if verbose == 1:
@@ -97,7 +97,7 @@ class CDEGSolver:
 
         # self loop 짝수 개 검출
         for edge in unique_out_edges:
-            m = self.graph.get_num(edge[1], edge[0])
+            m = self.graph.get_multiplicity(edge[1], edge[0])
             if m >= 2:
                 to_remove.append((edge[1], edge[0], m - m % 2))
 
@@ -108,8 +108,8 @@ class CDEGSolver:
                     continue
                 if self.graph.has_edge(edge1[1], edge2[0]) and self.graph.has_edge(edge2[1], edge1[0]):
                     delete_num = min(
-                        self.graph.get_num(edge1[1], edge2[0]),
-                        self.graph.get_num(edge2[1], edge1[0])
+                        self.graph.get_multiplicity(edge1[1], edge2[0]),
+                        self.graph.get_multiplicity(edge2[1], edge1[0])
                     )
 
                     to_remove.append((edge1[1], edge2[0], delete_num))
@@ -120,7 +120,7 @@ class CDEGSolver:
         if verbose == 1:
             print(sum([m for _, _, m in to_remove]), "edges removed")
 
-    def classify_loop_winlose(self, unique_out_edges=None, verbose=0, lose_sinks=None, win_sinks=None):
+    def classify_winlose_involving_1_cycles(self, unique_out_edges=None, verbose=0, lose_sinks=None, win_sinks=None):
         if verbose == 1:
             print("Classify loop winlose : ", end="")
 
@@ -196,7 +196,7 @@ class CDEGSolver:
                   "lose,", len(self.graph), "remain")
 
     # def copy(self):
-    #     cdeg = CDEG(self.graph.copy())
+    #     cdeg = TwoStep(self.graph.copy())
     #     cdeg.winlose = self.winlose.copy()
     #     cdeg.strategy = self.strategy.copy()
     #     cdeg.two_cycles = self.two_cycles.copy()
@@ -205,7 +205,7 @@ class CDEGSolver:
 
     # def is_win(self, node: any, sorted_func=None, win_callback=None, cnt_limit=None):
 
-    #     def dfs(graph: CDEGGraph, node: any, trail: Optional[Move] = None):
+    #     def dfs(graph: TwoStepGraph, node: any, trail: Optional[Move] = None):
 
     #         nonlocal cnt_limit
     #         nonlocal sorted_func
@@ -218,7 +218,7 @@ class CDEGSolver:
 
     #         graph_copy = reachable_graph(graph, node)
 
-    #         cdeg = CDEG(graph_copy)
+    #         cdeg = TwoStep(graph_copy)
     #         cdeg.fastly_classify()
 
     #         winlose = cdeg.winlose
@@ -256,7 +256,7 @@ class CDEGSolver:
     #     return dfs(self.graph, node)
 
 
-def reachable_graph(graph: CDEGGraph, node: any) -> CDEGGraph:
+def reachable_graph(graph: TwoStepGraph, node: any) -> TwoStepGraph:
     if type(node) != BipartiteNode:
         node = BipartiteNode(node, 0)
     reachable_nodes = descendants(graph, node) | {node}
@@ -264,7 +264,7 @@ def reachable_graph(graph: CDEGGraph, node: any) -> CDEGGraph:
     return subgraph
 
 
-def get_major_graph(graph: CDEGGraph) -> CDEGGraph:
+def get_major_graph(graph: TwoStepGraph) -> TwoStepGraph:
     scc_list = list(strongly_connected_components(graph))
     scc_graph = condensation(graph, scc_list)
     leaf_scc_indices = {
@@ -277,7 +277,7 @@ def get_major_graph(graph: CDEGGraph) -> CDEGGraph:
     return graph.subgraph(leaf_sccs[0]).copy()
 
 
-def moves(graph: CDEGGraph, node: any) -> List[Move]:
+def moves(graph: TwoStepGraph, node: any) -> List[Move]:
 
     return [(succ0.value, succ1.value)
             for succ0 in graph.successors(BipartiteNode(node, 0))
@@ -291,4 +291,4 @@ if __name__ == "__main__":
     rule = Rule(0, -1, std)
     word_dict = WordDict(rule, words)
     graph = word_dict.make_graph()
-    solver = CDEGSolver(graph)
+    solver = TwoStepDEGSolver(graph)
