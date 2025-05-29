@@ -44,7 +44,9 @@ classDiagram
     class RDG
     class DEG
     class DVG
+    class two_step_DEG
 
-    DEG --|> RDG
-    DVG --|> RDG
+    RDG --|> DEG
+    RDG --|> DVG
+    two_step_DEG
 ```
