@@ -36,3 +36,15 @@ Directed Vertex Geography
 ### Two Step DEG
 
 Directed Vertex Geography with Two Step Moves
+
+### Class Hierarchy
+
+```mermaid
+classDiagram
+    class RDG
+    class DEG
+    class DVG
+
+    DEG --|> RDG
+    DVG --|> RDG
+```
